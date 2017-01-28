@@ -86,6 +86,10 @@
   "eslintConfig": {
     "parser": "babel-eslint",
     "extends": "airbnb",
+    "env": {
+      "browser": true,
+      "node": true
+    },
     "rules": {
       "semi": [2, "never"],
       "react/jsx-filename-extension": "off",
