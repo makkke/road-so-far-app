@@ -10,6 +10,7 @@ import store from './store'
 import router from './router'
 import history from './history'
 
+// eslint-disable-next-line
 let routes = require('./routes.json').default // Loaded with utils/routes-loader.js
 const container = document.getElementById('container')
 
