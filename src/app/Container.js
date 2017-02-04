@@ -2,6 +2,13 @@ import React from 'react'
 import Helmet from 'react-helmet'
 
 function Container(props) {
+  let children = null
+  if (props.children) {
+    children = React.cloneElement(props.children, {
+      auth: props.route.auth //sends auth instance from route to children
+    })
+  }
+
   return (
     <div>
       <Helmet
@@ -19,7 +26,7 @@ function Container(props) {
           },
         ]}
       />
-      {props.children}
+      {children}
     </div>
   )
 }

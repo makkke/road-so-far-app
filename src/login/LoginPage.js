@@ -1,11 +1,23 @@
-import React from 'react'
+import React, { Component, PropTypes } from 'react'
 
-class DashboardPage extends React.Component {
+import Auth from '../utils/auth'
+
+export class LoginPage extends Component {
+  static propTypes = {
+    location: PropTypes.object,
+    auth: PropTypes.instanceOf(Auth)
+  }
+
   render() {
+    const { auth } = this.props
+
     return (
-      <div>Dashboard</div>
+      <div>
+        <h2>Login</h2>
+        <button onClick={() => auth.login()}>Login</button>
+      </div>
     )
   }
 }
 
-export default DashboardPage
+export default LoginPage
