@@ -1,50 +1,105 @@
-import Auth0Lock from 'auth0-lock'
 import { browserHistory } from 'react-router'
+import auth0 from 'auth0-js'
+
+import { isTokenExpired } from './jwt'
 
 export default class AuthService {
-  constructor(clientId, domain) {
-    // Configure Auth0
-    this.lock = new Auth0Lock(clientId, domain, {
-      auth: {
-        redirectUrl: 'http://localhost:8080/login',
-        responseType: 'token',
-      },
+  constructor() {
+    this.auth0 = new auth0.WebAuth({
+      clientID: 'vwqeSmdGge6jdXzDwTnTQE3K7KOS3n0H',
+      domain: 'makkke.auth0.com',
+      responseType: 'token id_token',
+      redirectUri: 'http://localhost:8080/login',
     })
-    // Add callback for lock `authenticated` event
-    this.lock.on('authenticated', this._doAuthentication.bind(this))
-    // binds login functions to keep this context
+
     this.login = this.login.bind(this)
+    this.signup = this.signup.bind(this)
+    this.loginWithGoogle = this.loginWithGoogle.bind(this)
   }
 
-  _doAuthentication(authResult) {
-    // Saves the user token
-    this.setToken(authResult.idToken)
-    // navigate to the home route
-    browserHistory.replace('/dashboard')
+  login(username, password) {
+    this.auth0.client.login({
+      realm: 'Username-Password-Authentication',
+      username,
+      password,
+    }, (err, result) => {
+      if (err) {
+        console.error(new Error(err.description))
+        return
+      }
+      if (result && result.idToken && result.accessToken) {
+        this.setToken(result.accessToken, result.idToken)
+        browserHistory.replace('/dashboard')
+      }
+    })
   }
 
-  login() {
-    // Call the show method to display the widget.
-    this.lock.show()
+  signup(email, password) {
+    this.auth0.redirect.signupAndLogin({
+      connection: 'Username-Password-Authentication',
+      email,
+      password,
+    }, (err) => {
+      if (err) {
+        console.error(new Error(err.description))
+      }
+    })
+  }
+
+  loginWithGoogle() {
+    this.auth0.authorize({ connection: 'google-oauth2' })
+  }
+
+  parseHash(hash) {
+    this.auth0.parseHash({ hash }, (err, result) => {
+      if (result && result.accessToken && result.idToken) {
+        this.setToken(result.accessToken, result.idToken)
+        browserHistory.replace('/dashboard')
+        this.auth0.client.userInfo(result.accessToken, (error, profile) => {
+          if (error) {
+            console.error('Error loading the Profile', error)
+            return
+          }
+
+          this.setProfile(profile)
+        })
+      } else if (result && result.error) {
+        console.error(new Error(result.error))
+      }
+    })
   }
 
   loggedIn() {
     // Checks if there is a saved token and it's still valid
-    return !!this.getToken()
+    const token = this.getToken()
+    return !!token && !isTokenExpired(token)
   }
 
-  setToken(idToken) {
-    // Saves user token to local storage
+  setToken(accessToken, idToken) {
+    // Saves user access token and ID token into local storage
+    localStorage.setItem('access_token', accessToken)
     localStorage.setItem('id_token', idToken)
   }
 
+  setProfile(profile) {
+    // Saves profile data to localStorage
+    localStorage.setItem('profile', JSON.stringify(profile))
+  }
+
+  getProfile() {
+    // Retrieves the profile data from localStorage
+    const profile = localStorage.getItem('profile')
+    return profile ? JSON.parse(localStorage.profile) : {}
+  }
+
   getToken() {
-    // Retrieves the user token from local storage
+    // Retrieves the user token from localStorage
     return localStorage.getItem('id_token')
   }
 
   logout() {
-    // Clear user token and profile data from local storage
+    // Clear user token and profile data from localStorage
     localStorage.removeItem('id_token')
+    localStorage.removeItem('profile')
   }
 }
