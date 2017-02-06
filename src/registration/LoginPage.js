@@ -6,12 +6,12 @@ import AuthService from '../utils/auth'
 
 class LoginPage extends Component {
   static contextTypes = {
-    router: PropTypes.object
+    router: PropTypes.object // eslint-disable-line
   }
 
   static propTypes = {
-    location: PropTypes.object,
-    auth: PropTypes.instanceOf(AuthService)
+    location: PropTypes.object, // eslint-disable-line
+    auth: PropTypes.instanceOf(AuthService),
   }
 
   state = {
@@ -41,16 +41,11 @@ class LoginPage extends Component {
       this.setState({ loading: true })
       this.props.auth.login(email, password)
       // await this.props.actions.login(this.state.email, this.state.password)
-      const redirect = this.props.location.query.next || '/'
+      const redirect = this.props.location.query.next || '/dashboard'
       this.context.router.push(redirect)
     } catch (err) {
       this.setState({ errors: { login: true }, loading: false })
     }
-  }
-
-  signup = () => {
-    const { email, password } = this.state
-    this.props.auth.signup(email, password)
   }
 
   loginWithGoogle = () => {
@@ -77,7 +72,7 @@ class LoginPage extends Component {
         <Button raised onClick={this.login}>Log In</Button>
         <Button raised onClick={this.loginWithGoogle}>Login with Google</Button>
         <div>
-          <span>{'Don\'t have an account?'}</span>
+          <span>Dont have an account?</span>
           <Link to="/signup">Sign up</Link>
         </div>
       </div>
