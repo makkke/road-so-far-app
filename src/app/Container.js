@@ -5,7 +5,7 @@ function Container(props) {
   let children = null
   if (props.children) {
     children = React.cloneElement(props.children, {
-      auth: props.route.auth //sends auth instance from route to children
+      auth: props.route.auth // eslint-disable-line
     })
   }
 

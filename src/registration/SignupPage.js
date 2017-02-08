@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react'
 import { Textfield, Button } from 'react-mdl'
 import { Link } from 'react-router'
 
-import AuthService from '../utils/auth'
+import { signup } from '../utils/auth'
 
 class SignupPage extends Component {
   static contextTypes = {
@@ -11,7 +11,6 @@ class SignupPage extends Component {
 
   static propTypes = {
     location: PropTypes.object, // eslint-disable-line
-    auth: PropTypes.instanceOf(AuthService),
   }
 
   state = {
@@ -39,7 +38,7 @@ class SignupPage extends Component {
     try {
       const { email, password } = this.state
       this.setState({ loading: true })
-      this.props.auth.signup(email, password)
+      signup(email, password)
       // await this.props.actions.login(this.state.email, this.state.password)
       const redirect = this.props.location.query.next || '/dashboard'
       this.context.router.push(redirect)

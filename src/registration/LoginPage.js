@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react'
 import { Textfield, Button } from 'react-mdl'
 import { Link } from 'react-router'
 
-import AuthService from '../utils/auth'
+import { login, loginWithGoogle } from '../utils/auth'
 
 class LoginPage extends Component {
   static contextTypes = {
@@ -11,7 +11,6 @@ class LoginPage extends Component {
 
   static propTypes = {
     location: PropTypes.object, // eslint-disable-line
-    auth: PropTypes.instanceOf(AuthService),
   }
 
   state = {
@@ -39,17 +38,13 @@ class LoginPage extends Component {
     try {
       const { email, password } = this.state
       this.setState({ loading: true })
-      this.props.auth.login(email, password)
+      login(email, password)
       // await this.props.actions.login(this.state.email, this.state.password)
       const redirect = this.props.location.query.next || '/dashboard'
       this.context.router.push(redirect)
     } catch (err) {
       this.setState({ errors: { login: true }, loading: false })
     }
-  }
-
-  loginWithGoogle = () => {
-    this.props.auth.loginWithGoogle()
   }
 
   render() {
@@ -70,7 +65,7 @@ class LoginPage extends Component {
           onChange={this.handleInputChange}
         />
         <Button raised onClick={this.login}>Log In</Button>
-        <Button raised onClick={this.loginWithGoogle}>Login with Google</Button>
+        <Button raised onClick={() => loginWithGoogle}>Login with Google</Button>
         <div>
           <span>Dont have an account?</span>
           <Link to="/signup">Sign up</Link>

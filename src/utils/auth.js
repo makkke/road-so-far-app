@@ -1,105 +1,137 @@
 import { browserHistory } from 'react-router'
-import auth0 from 'auth0-js'
+import Auth0 from 'auth0-js'
+import decode from 'jwt-decode'
 
-import { isTokenExpired } from './jwt'
-
-export default class AuthService {
-  constructor() {
-    this.auth0 = new auth0.WebAuth({
-      clientID: 'vwqeSmdGge6jdXzDwTnTQE3K7KOS3n0H',
-      domain: 'makkke.auth0.com',
-      responseType: 'token id_token',
-      redirectUri: 'http://localhost:8080/login',
-    })
-
-    this.login = this.login.bind(this)
-    this.signup = this.signup.bind(this)
-    this.loginWithGoogle = this.loginWithGoogle.bind(this)
+export const getTokenExpirationDate = (token) => {
+  const decoded = decode(token)
+  if (!decoded.exp) {
+    return null
   }
 
-  login(username, password) {
-    this.auth0.client.login({
-      realm: 'Username-Password-Authentication',
-      username,
-      password,
-    }, (err, result) => {
-      if (err) {
-        console.error(new Error(err.description))
-        return
-      }
-      if (result && result.idToken && result.accessToken) {
-        this.setToken(result.accessToken, result.idToken)
-        browserHistory.replace('/dashboard')
-      }
-    })
-  }
+  const date = new Date(0) // The 0 here is the key, which sets the date to the epoch
+  date.setUTCSeconds(decoded.exp)
 
-  signup(email, password) {
-    this.auth0.redirect.signupAndLogin({
-      connection: 'Username-Password-Authentication',
-      email,
-      password,
-    }, (err) => {
-      if (err) {
-        console.error(new Error(err.description))
-      }
-    })
-  }
-
-  loginWithGoogle() {
-    this.auth0.authorize({ connection: 'google-oauth2' })
-  }
-
-  parseHash(hash) {
-    this.auth0.parseHash({ hash }, (err, result) => {
-      if (result && result.accessToken && result.idToken) {
-        this.setToken(result.accessToken, result.idToken)
-        browserHistory.replace('/dashboard')
-        this.auth0.client.userInfo(result.accessToken, (error, profile) => {
-          if (error) {
-            console.error('Error loading the Profile', error)
-            return
-          }
-
-          this.setProfile(profile)
-        })
-      } else if (result && result.error) {
-        console.error(new Error(result.error))
-      }
-    })
-  }
-
-  loggedIn() {
-    // Checks if there is a saved token and it's still valid
-    const token = this.getToken()
-    return !!token && !isTokenExpired(token)
-  }
-
-  setToken(accessToken, idToken) {
-    // Saves user access token and ID token into local storage
-    localStorage.setItem('access_token', accessToken)
-    localStorage.setItem('id_token', idToken)
-  }
-
-  setProfile(profile) {
-    // Saves profile data to localStorage
-    localStorage.setItem('profile', JSON.stringify(profile))
-  }
-
-  getProfile() {
-    // Retrieves the profile data from localStorage
-    const profile = localStorage.getItem('profile')
-    return profile ? JSON.parse(localStorage.profile) : {}
-  }
-
-  getToken() {
-    // Retrieves the user token from localStorage
-    return localStorage.getItem('id_token')
-  }
-
-  logout() {
-    // Clear user token and profile data from localStorage
-    localStorage.removeItem('id_token')
-    localStorage.removeItem('profile')
-  }
+  return date
 }
+
+export const isTokenExpired = (token) => {
+  const date = getTokenExpirationDate(token)
+  if (date === null) {
+    return false
+  }
+
+  return !(date.valueOf() > new Date().valueOf())
+}
+
+/**
+ * Retrieves the user token from localStorage
+ * @return {[type]} [description]
+ */
+export const getToken = () => localStorage.getItem('id_token')
+
+/**
+ * Checks if there is a saved token and it's still valid
+ * @return {[type]} [description]
+ */
+export const isLoggedIn = () => {
+  const token = getToken()
+
+  return !!token && !isTokenExpired(token)
+}
+
+const createAuth0 = () => (
+  // TODO: pass config from ENV variables
+  new Auth0.WebAuth({
+    clientID: 'vwqeSmdGge6jdXzDwTnTQE3K7KOS3n0H',
+    domain: 'makkke.auth0.com',
+    responseType: 'token id_token',
+    redirectUri: 'http://localhost:8080/login',
+  })
+)
+
+/**
+ * Saves user access token and ID token into local storage
+ * @type {[type]}
+ */
+const setToken = (accessToken, idToken) => {
+  localStorage.setItem('access_token', accessToken)
+  localStorage.setItem('id_token', idToken)
+}
+
+export const parseHash = (hash) => {
+  const auth0 = createAuth0()
+  auth0.parseHash({ hash }, (err, result) => {
+    if (result && result.accessToken && result.idToken) {
+      setToken(result.accessToken, result.idToken)
+      // browserHistory.replace('/dashboard')
+      // auth0.client.userInfo(result.accessToken, (error, profile) => {
+      //   if (error) {
+      //     console.error('Error loading the Profile', error)
+      //     return
+      //   }
+      //
+      //   setProfile(profile)
+      // })
+    } else if (result && result.error) {
+      console.error(new Error(result.error)) // eslint-disable-line
+    }
+  })
+}
+
+/**
+ * Clears user token and profile data from localStorage
+ * @return {[type]} [description]
+ */
+export const logout = () => {
+  localStorage.removeItem('id_token')
+  localStorage.removeItem('profile')
+}
+
+export const login = (username, password) => {
+  const auth0 = createAuth0()
+  auth0.client.login({
+    realm: 'Username-Password-Authentication',
+    username,
+    password,
+  }, (err, result) => {
+    if (err) {
+      console.error(new Error(err.description)) // eslint-disable-line
+      return
+    }
+    if (result && result.idToken && result.accessToken) {
+      setToken(result.accessToken, result.idToken)
+      browserHistory.replace('/dashboard')
+    }
+  })
+}
+
+export const signup = (email, password) => {
+  const auth0 = createAuth0()
+  auth0.redirect.signupAndLogin({
+    connection: 'Username-Password-Authentication',
+    email,
+    password,
+  }, (err) => {
+    if (err) {
+      console.error(new Error(err.description)) // eslint-disable-line
+    }
+  })
+}
+
+export const loginWithGoogle = () => {
+  const auth0 = createAuth0()
+  auth0.authorize({ connection: 'google-oauth2' })
+}
+
+// setProfile(profile) {
+//   // Saves profile data to localStorage
+//   localStorage.setItem('profile', JSON.stringify(profile))
+// }
+//
+// getProfile() {
+//   // Retrieves the profile data from localStorage
+//   const profile = localStorage.getItem('profile')
+//   return profile ? JSON.parse(localStorage.profile) : {}
+// }
+
+export default {}
