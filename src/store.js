@@ -1,17 +1,26 @@
-import { createStore } from 'redux'
+import { createStore, applyMiddleware, compose } from 'redux'
+import thunk from 'redux-thunk'
 
-// Centralized application state
-// For more information visit http://redux.js.org/
-const initialState = { count: 0 }
+import rootReducer from './reducers'
 
-const store = createStore((state = initialState, action) => {
-  // TODO: Add action handlers (aka "reducers")
-  switch (action.type) {
-    case 'COUNT':
-      return { ...state, count: (state.count) + 1 }
-    default:
-      return state
+export function configureStore(initialState = {}) {
+  // Middleware and store enhancers
+  const enhancers = [
+    applyMiddleware(thunk),
+  ]
+
+  const store = createStore(rootReducer, initialState, compose(...enhancers))
+
+  // For hot reloading reducers
+  if (module.hot) {
+    module.hot.accept('./reducers', () => {
+      const nextReducer = require('./reducers').default // eslint-disable-line
+
+      store.replaceReducer(nextReducer)
+    })
   }
-})
 
-export default store
+  return store
+}
+
+export default configureStore

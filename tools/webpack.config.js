@@ -5,26 +5,20 @@ const pkg = require('../package.json')
 
 const isDebug = global.DEBUG === false ? false : !process.argv.includes('--release')
 const isVerbose = process.argv.includes('--verbose') || process.argv.includes('-v')
-const useHMR = !!global.HMR // Hot Module Replacement (HMR)
+const useHMR = !!global.HMR
 const babelConfig = Object.assign({}, pkg.babel, {
   babelrc: false,
   cacheDirectory: useHMR,
   presets: pkg.babel.presets.map(x => x === 'latest' ? ['latest', { es2015: { modules: false } }] : x), // eslint-disable-line
 })
 
-// Webpack configuration (main.js => public/dist/main.{hash}.js)
 // http://webpack.github.io/docs/configuration.html
 const config = {
-
-  // The base directory for resolving the entry option
   context: path.resolve(__dirname, '../src'),
 
-  // The entry point for the bundle
   entry: [
-    /* Material Design Lite (https://getmdl.io) */
     '!!style-loader!css-loader!react-mdl/extra/material.min.css',
     'react-mdl/extra/material.min.js',
-    /* The main entry point of your JavaScript application */
     './main.js',
   ],
 
@@ -57,7 +51,12 @@ const config = {
   // The list of plugins for Webpack compiler
   plugins: [
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV': isDebug ? '"development"' : '"production"',
+      'process.env': {
+        NODE_ENV: isDebug ? '"development"' : '"production"',
+        AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_ID || '"vwqeSmdGge6jdXzDwTnTQE3K7KOS3n0H"',
+        AUTH0_DOMAIN: process.env.AUTH0_DOMAIN || '"makkke.auth0.com"',
+        AUTH0_REDIRECT_URI: process.env.AUTH0_REDIRECT_URI || '"http://localhost:8080/login"',
+      },
       __DEV__: isDebug,
     }),
     // Emit a JSON file with assets paths
@@ -73,7 +72,6 @@ const config = {
     }),
   ],
 
-  // Options affecting the normal modules
   module: {
     rules: [
       {
@@ -110,32 +108,6 @@ const config = {
             },
           },
         ],
-      },
-      {
-        test: /\.json$/,
-        exclude: [
-          path.resolve(__dirname, '../src/routes.json'),
-        ],
-        loader: 'json-loader',
-      },
-      {
-        test: /\.json$/,
-        include: [
-          path.resolve(__dirname, '../src/routes.json'),
-        ],
-        use: [
-          {
-            loader: 'babel-loader',
-            options: babelConfig,
-          },
-          {
-            loader: path.resolve(__dirname, './routes-loader.js'),
-          },
-        ],
-      },
-      {
-        test: /\.md$/,
-        loader: path.resolve(__dirname, './markdown-loader.js'),
       },
       {
         test: /\.(png|jpg|jpeg|gif|svg|woff|woff2)$/,
