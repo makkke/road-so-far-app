@@ -51,7 +51,12 @@ const config = {
   // The list of plugins for Webpack compiler
   plugins: [
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV': isDebug ? '"development"' : '"production"',
+      'process.env': {
+        NODE_ENV: isDebug ? '"development"' : '"production"',
+        AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_ID || '"vwqeSmdGge6jdXzDwTnTQE3K7KOS3n0H"',
+        AUTH0_DOMAIN: process.env.AUTH0_DOMAIN || '"makkke.auth0.com"',
+        AUTH0_REDIRECT_URI: process.env.AUTH0_REDIRECT_URI || '"http://localhost:8080/login"',
+      },
       __DEV__: isDebug,
     }),
     // Emit a JSON file with assets paths

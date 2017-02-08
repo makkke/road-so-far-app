@@ -40,12 +40,11 @@ export const isLoggedIn = () => {
 }
 
 const createAuth0 = () => (
-  // TODO: pass config from ENV variables
   new Auth0.WebAuth({
-    clientID: 'vwqeSmdGge6jdXzDwTnTQE3K7KOS3n0H',
-    domain: 'makkke.auth0.com',
+    clientID: process.env.AUTH0_CLIENT_ID,
+    domain: process.env.AUTH0_DOMAIN,
     responseType: 'token id_token',
-    redirectUri: 'http://localhost:8080/login',
+    redirectUri: process.env.AUTH0_REDIRECT_URI,
   })
 )
 
