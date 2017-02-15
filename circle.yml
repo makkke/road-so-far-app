@@ -27,20 +27,11 @@ stages:
         shell: /bin/bash
         command: yarn build
 
-      # Create deployable artifacts
-      - type: shell
-        shell: /bin/bash
-        command: |
-          set -exu
-          mkdir -p /tmp/artifacts
-          create_jars.sh ${CIRCLE_BUILD_NUM}
-          cp *.jar /tmp/artifacts
-
       # Deploy production
       - type: deploy
         shell: /bin/bash
         command: |
           aws s3 sync ./public s3://app.roadsofar.com/ --delete
-          if [ "${CIRCLE_BRANCH}" == "master" ]; then
-            aws s3 sync ./public s3://app.roadsofar.com/ --delete
-          fi
+          # if [ "${CIRCLE_BRANCH}" == "master" ]; then
+          #   aws s3 sync ./public s3://app.roadsofar.com/ --delete
+          # fi
