@@ -50,7 +50,7 @@ class LoginPage extends Component {
   render() {
     return (
       <div>
-        <h1>Login</h1>
+        <h1>Login Test</h1>
         <Textfield
           name="email"
           label="Email"
