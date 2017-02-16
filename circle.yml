@@ -10,25 +10,29 @@ stages:
     workDir: ~/road-so-far-app
     steps:
       - type: checkout
+
       - name: Install Node.js dependencies
         type: shell
         shell: /bin/bash
         command: yarn install
-      # Run linting
-      - type: shell
+
+      - name: Lint
+        type: shell
         shell: /bin/bash
         command: yarn lint
-      # Run testing
-      - type: shell
+
+      - name: Test
+        type: shell
         shell: /bin/bash
         command: yarn test
-      # Build
-      - type: shell
+
+      - name: Build
+        type: shell
         shell: /bin/bash
         command: yarn build
 
-      # Deploy to production
-      - type: deploy
+      - name: Deploy to production
+        type: deploy
         shell: /bin/bash
         command: |
           if [ "${CIRCLE_BRANCH}" == "master" ]; then
