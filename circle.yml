@@ -10,7 +10,7 @@ stages:
     workDir: ~/road-so-far-app
     steps:
       - type: checkout
-      - name: "Install Node.js dependencies"
+      - name: Install Node.js dependencies
         type: shell
         shell: /bin/bash
         command: yarn install
