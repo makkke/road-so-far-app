@@ -27,12 +27,10 @@ stages:
         shell: /bin/bash
         command: yarn build
 
-      # Deploy production
+      # Deploy to production
       - type: deploy
         shell: /bin/bash
         command: |
-          ls ~/.aws
-          aws s3 sync ./public s3://app.roadsofar.com/ --delete
-          # if [ "${CIRCLE_BRANCH}" == "master" ]; then
-          #   aws s3 sync ./public s3://app.roadsofar.com/ --delete
-          # fi
+          if [ "${CIRCLE_BRANCH}" == "master" ]; then
+            aws s3 sync ./public s3://app.roadsofar.com/ --delete
+          fi
