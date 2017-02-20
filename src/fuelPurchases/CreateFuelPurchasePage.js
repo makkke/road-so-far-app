@@ -1,15 +1,20 @@
 import React, { Component, PropTypes } from 'react'
 import { graphql } from 'react-apollo'
 import gql from 'graphql-tag'
-import { FABButton, Icon } from 'react-mdl'
-import { Link } from 'react-router'
-import { DatePicker } from 'react-mdl-datepicker'
-import moment from 'moment'
+import { AppBar, DatePicker } from 'material-ui'
+import LocationAutoComplete from '../app/components/LocationAutoComplete'
 
 class CreateFuelPurchasesPage extends Component {
+  constructor() {
+    super()
+    navigator.geolocation.getCurrentPosition((position) => {
+      console.log(position)
+    })
+  }
+
   state = {
-    createdAt: moment(),
-    password: '',
+    createdAt: new Date(),
+    searchText: '',
     loading: false,
     errors: {},
   }
@@ -19,13 +24,31 @@ class CreateFuelPurchasesPage extends Component {
 
     return (
       <div>
-        <h1>Create Fuel Purchase</h1>
-        <DatePicker
-          label="Date"
-          defaultDate={createdAt}
-          maxDate={createdAt}
-          onChange={(x) => console.log(x)}
+        <AppBar
+          title="Create Fuel Purchase"
         />
+        <DatePicker
+          floatingLabelText="Date"
+          autoOk
+          maxDate={new Date()}
+          value={createdAt}
+          onChange={(event, date) => this.setState({ createdAt: date })}
+        />
+        <LocationAutoComplete
+          searchText={this.state.searchText}
+          name={'location'}
+          floatingLabelText="Location"
+          onChange={event => this.setState({ searchText: event.target.value })}
+          onNewRequest={(selectedData, searchedText, selectedDataIndex) => console.log(selectedData, searchedText, selectedDataIndex)}
+        />
+        {/* <Autocomplete
+          style={{ width: '90%' }}
+          onPlaceSelected={(place) => {
+            console.log(place)
+          }}
+          types={['(regions)']}
+          componentRestrictions={{ country: ['ca', 'us'] }}
+        /> */}
       </div>
     )
   }

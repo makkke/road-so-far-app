@@ -17,8 +17,6 @@ const config = {
   context: path.resolve(__dirname, '../src'),
 
   entry: [
-    '!!style-loader!css-loader!react-mdl/extra/material.min.css',
-    'react-mdl/extra/material.min.js',
     './main.js',
   ],
 

@@ -3,6 +3,7 @@ import { Provider } from 'react-redux'
 import ApolloClient, { createNetworkInterface } from 'apollo-client'
 import { ApolloProvider } from 'react-apollo'
 import { Router, browserHistory } from 'react-router'
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
 
 // Import Routes
 import routes from './routes'
@@ -28,13 +29,15 @@ const client = new ApolloClient({ networkInterface })
 
 function App(props) {
   return (
-    <ApolloProvider client={client}>
-      <Provider store={props.store}>
-        <Router history={browserHistory}>
-          {routes}
-        </Router>
-      </Provider>
-    </ApolloProvider>
+    <MuiThemeProvider>
+      <ApolloProvider client={client}>
+        <Provider store={props.store}>
+          <Router history={browserHistory}>
+            {routes}
+          </Router>
+        </Provider>
+      </ApolloProvider>
+    </MuiThemeProvider>
   )
 }
 
