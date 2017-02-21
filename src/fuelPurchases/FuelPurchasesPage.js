@@ -1,24 +1,34 @@
 import React, { Component, PropTypes } from 'react'
+import { Link } from 'react-router'
 import { graphql } from 'react-apollo'
 import gql from 'graphql-tag'
-import { FABButton, Icon } from 'react-mdl'
-import { Link } from 'react-router'
+import { FloatingActionButton } from 'material-ui'
+import { ContentAdd } from 'material-ui/svg-icons'
+
+const styles = {
+  button: {
+    position: 'fixed',
+    right: 24,
+    bottom: 24,
+  },
+}
 
 class FuelPurchasesPage extends Component {
   state = {}
 
   render() {
     const { fuelPurchases = [] } = this.props.data
+
     return (
       <div>
         <h1>Fuel Purchases</h1>
         <ul>
           {fuelPurchases.map(x => <li key={x.id}>{x.quantity.value} Liters</li>)}
         </ul>
-        <Link to="/fuel-purchases/create">
-          <FABButton colored>
-            <Icon name="add" />
-          </FABButton>
+        <Link to="/fuel-purchases/create" style={styles.button}>
+          <FloatingActionButton>
+            <ContentAdd />
+          </FloatingActionButton>
         </Link>
       </div>
     )

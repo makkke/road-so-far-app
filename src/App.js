@@ -19,8 +19,7 @@ networkInterface.use([{
     }
 
     // get the authentication token from local storage if it exists
-    // const token = localStorage.getItem('id_token')
-    const token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL21ha2trZS5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NThhYTJiMTg4MmIwY2EwNzc0NjNkOGQ5IiwiYXVkIjoidndxZVNtZEdnZTZqZFh6RHdUblRRRTNLN0tPUzNuMEgiLCJleHAiOjE0ODc1ODMxNjEsImlhdCI6MTQ4NzU0NzE2MSwiYXRfaGFzaCI6IkNrbkJYSTFqRzFqN283cXBfcllucEEifQ.4rbtTRxC-obLzfbRFomfSD7yOPlxL6G1Dk_QsCya8fk'
+    const token = localStorage.getItem('id_token')
     req.options.headers.authorization = token ? `Bearer ${token}` : null // eslint-disable-line
     next()
   },

@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react'
-import { Textfield, Button } from 'react-mdl'
+import { TextField, RaisedButton } from 'material-ui'
 import { Link } from 'react-router'
 
 import { signup } from '../utils/auth'
@@ -51,22 +51,20 @@ class SignupPage extends Component {
     return (
       <div>
         <h1>Sign Up</h1>
-        <Textfield
+        <TextField
           name="email"
-          label="Email"
-          floatingLabel
+          floatingLabelText="Email"
           onChange={this.handleInputChange}
         />
-        <Textfield
+        <TextField
           name="password"
-          label="Password"
+          floatingLabelText="Password"
           type="password"
-          floatingLabel
           onChange={this.handleInputChange}
         />
-        <Button raised onClick={this.signup}>Sign Up</Button>
+        <RaisedButton fullWidth onClick={this.signup}>Sign Up</RaisedButton>
         <div>
-          <span>{'Already have an account?'}</span>
+          <span>Already have an account?</span>
           <Link to="/login">Log in</Link>
         </div>
       </div>
