@@ -12,7 +12,6 @@ function Container(props) {
   return (
     <div>
       <Helmet
-        title="Road So Far"
         titleTemplate="%s | Road So Far"
         meta={[
           { charset: 'utf-8' },

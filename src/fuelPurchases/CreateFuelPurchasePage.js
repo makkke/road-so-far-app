@@ -7,14 +7,34 @@ import LocationAutoComplete from '../app/components/LocationAutoComplete'
 class CreateFuelPurchasesPage extends Component {
   constructor() {
     super()
+
+    // get user geolocation and prepopulate LocationAutoComplete
     navigator.geolocation.getCurrentPosition((position) => {
-      console.log(position)
+      const geocoder = new google.maps.Geocoder
+
+      const location = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      }
+      geocoder.geocode({ location }, (results, status) => {
+        if (status === 'OK') {
+          const [address] = results
+          if (address) {
+            this.setState({ searchText: address.formatted_address })
+          }
+        }
+      })
     })
   }
 
   state = {
-    createdAt: new Date(),
     searchText: '',
+    createdAt: new Date(),
+    location: {
+      address: '',
+      city: '',
+      region: '',
+    },
     loading: false,
     errors: {},
   }
@@ -40,6 +60,11 @@ class CreateFuelPurchasesPage extends Component {
           floatingLabelText="Location"
           onChange={event => this.setState({ searchText: event.target.value })}
           onNewRequest={(selectedData, searchedText, selectedDataIndex) => console.log(selectedData, searchedText, selectedDataIndex)}
+        />
+        <TextField
+          name="quantity"
+          floatingLabelText="Quantity"
+          onChange={this.handleInputChange}
         />
         {/* <Autocomplete
           style={{ width: '90%' }}
