@@ -2,7 +2,8 @@
   "name": "road-so-far-app",
   "version": "0.0.2",
   "scripts": {
-    "eslint": "eslint components src test tools postcss.config.js webpack.config.js",
+    "start:dev": "node tools/run.js",
+    "eslint": "eslint src test tools postcss.config.js webpack.config.js",
     "stylelint": "stylelint \"components/**/*.css\" \"src/**/*.css\"",
     "lint": "npm run eslint && npm run stylelint",
     "test": "mocha --compilers js:babel-register",
@@ -10,8 +11,7 @@
     "build": "node tools/build.js",
     "build:debug": "node tools/build.js --debug",
     "publish": "node tools/publish.js",
-    "publish:debug": "node tools/publish.js --debug",
-    "start": "node tools/run.js"
+    "publish:debug": "node tools/publish.js --debug"
   },
   "dependencies": {
     "apollo-client": "^0.8.7",
@@ -108,6 +108,9 @@
     "env": {
       "browser": true,
       "node": true
+    },
+    "globals": {
+      "google": true
     },
     "rules": {
       "semi": [

@@ -1,52 +1,72 @@
 import React, { Component, PropTypes } from 'react'
 import { graphql } from 'react-apollo'
 import gql from 'graphql-tag'
-import { AppBar, DatePicker } from 'material-ui'
+import { AppBar, DatePicker, TextField, RaisedButton } from 'material-ui'
+
+import { getCurrentLocation } from '../utils/google'
+import { isProvince } from './utils'
 import LocationAutoComplete from '../app/components/LocationAutoComplete'
 
 class CreateFuelPurchasesPage extends Component {
   constructor() {
     super()
-
-    // get user geolocation and prepopulate LocationAutoComplete
-    navigator.geolocation.getCurrentPosition((position) => {
-      const geocoder = new google.maps.Geocoder
-
-      const location = {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude,
-      }
-      geocoder.geocode({ location }, (results, status) => {
-        if (status === 'OK') {
-          const [address] = results
-          if (address) {
-            this.setState({ searchText: address.formatted_address })
-          }
-        }
+    // TODO: for some reason async is not working here, need to find out why
+    getCurrentLocation().then(({ city, region, country }) => {
+      this.setState({
+        searchText: `${city}, ${region}, ${country}`,
+        city,
+        region,
       })
     })
   }
 
   state = {
     searchText: '',
-    createdAt: new Date(),
-    location: {
-      address: '',
-      city: '',
-      region: '',
-    },
     loading: false,
     errors: {},
+
+    quantity: 0,
+    address: '',
+    region: '',
+    city: '',
+    createdAt: new Date(),
+  }
+
+  handleInputChange = (event) => {
+    const { errors } = this.state
+    const value = event.target.value.trim()
+    const field = event.target.name
+
+    errors[field] = null
+    this.setState({ [field]: value, errors })
+  }
+
+  handleCreateButtonClick = () => {
+    // validate
+    const { errors } = this.state
+    const quantity = parseInt(this.state.quantity, 10)
+
+    if (isNaN(quantity)) {
+      errors.quantity = 'Should be a number'
+      this.setState({ errors })
+      return
+    } else if (quantity <= 0) {
+      errors.quantity = 'Should be positive'
+      this.setState({ errors })
+      return
+    }
+
+    // TODO: should redirect after creation is done or optimictiq ui
+    this.props.createFuelPurchase({ ...this.state, quantity })
+    this.context.router.push('/fuel-purchases')
   }
 
   render() {
-    const { createdAt } = this.state
+    const { createdAt, errors } = this.state
 
     return (
       <div>
-        <AppBar
-          title="Create Fuel Purchase"
-        />
+        <AppBar title="Create Fuel Purchase" />
         <DatePicker
           floatingLabelText="Date"
           autoOk
@@ -56,48 +76,60 @@ class CreateFuelPurchasesPage extends Component {
         />
         <LocationAutoComplete
           searchText={this.state.searchText}
-          name={'location'}
+          name="location"
           floatingLabelText="Location"
           onChange={event => this.setState({ searchText: event.target.value })}
-          onNewRequest={(selectedData, searchedText, selectedDataIndex) => console.log(selectedData, searchedText, selectedDataIndex)}
+          onPlaceChange={({ city, region }) => this.setState({ city, region })}
         />
         <TextField
           name="quantity"
+          type="number"
           floatingLabelText="Quantity"
+          errorText={errors.quantity}
           onChange={this.handleInputChange}
         />
-        {/* <Autocomplete
-          style={{ width: '90%' }}
-          onPlaceSelected={(place) => {
-            console.log(place)
-          }}
-          types={['(regions)']}
-          componentRestrictions={{ country: ['ca', 'us'] }}
-        /> */}
+        <RaisedButton
+          fullWidth
+          onClick={this.handleCreateButtonClick}
+        >Create Fuel Purchase</RaisedButton>
       </div>
     )
   }
 }
 
-CreateFuelPurchasesPage.propTypes = {
-  data: PropTypes.shape({
-    loading: PropTypes.bool.isRequired,
-    fuelPurchases: PropTypes.array,
-  }).isRequired,
+CreateFuelPurchasesPage.contextTypes = {
+  router: PropTypes.object // eslint-disable-line
 }
 
-const MyQuery = gql`
-  query MyQuery {
-    fuelPurchases {
+CreateFuelPurchasesPage.propTypes = {
+  createFuelPurchase: PropTypes.func.isRequired,
+}
+
+const createFuelPurchase = gql`
+  mutation createFuelPurchase($input: FuelPurchaseInput!) {
+    createFuelPurchase(input: $input) {
       id
-      quantity {
-        value
-      }
-      createdAt
     }
   }
 `
 
-const CreateFuelPurchasesPageWithData = graphql(MyQuery)(CreateFuelPurchasesPage)
+const CreateFuelPurchasesPageWithData = graphql(createFuelPurchase, {
+  props: ({ mutate }) => ({
+    createFuelPurchase: (fuelPurchase) => {
+      const quantity = {
+        value: fuelPurchase.quantity,
+        unit: isProvince(fuelPurchase.region) ? 'LITER' : 'GALLON',
+      }
+      const input = {
+        quantity,
+        createdAt: fuelPurchase.createdAt,
+        region: fuelPurchase.region,
+        city: fuelPurchase.city,
+      }
+
+      return mutate({ variables: { input } })
+    },
+  }),
+})(CreateFuelPurchasesPage)
 
 export default CreateFuelPurchasesPageWithData

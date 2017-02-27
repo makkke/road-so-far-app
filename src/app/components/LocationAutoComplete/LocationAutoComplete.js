@@ -1,7 +1,7 @@
-/* global google*/
-
 import React, { Component, PropTypes } from 'react'
 import { AutoComplete } from 'material-ui'
+
+import { autocomplete, places, getAddressComponents } from '../../../utils/google'
 
 class LocationAutoComplete extends Component {
   static defaultProps = {
@@ -15,31 +15,15 @@ class LocationAutoComplete extends Component {
     data: [],
   }
 
-  componentDidMount() {
-    // const { componentRestrictions } = this.props
-    // const config = {
-    //   componentRestrictions
-    // }
-
-    // this.autocomplete = new google.maps.places.Autocomplete(this.refs.input, config);
-    //
-    // this.autocomplete.addListener('place_changed', this.onSelected.bind(this));
-
-    this.setState({
-      autocompleteService: new google.maps.places.AutocompleteService(),
-    })
-  }
-
   componentWillReceiveProps(nextProps) {
     if (this.props.searchText !== nextProps.searchText) {
-      this.onUpdateInput(nextProps.searchText, this.state.dataSource)
       this.handleInputChange(nextProps.searchText)
     }
   }
 
-  updateDatasource(data) {
+  updateDataSource(data) {
     if (!data || !data.length) {
-      return false
+      return
     }
 
     this.setState({
@@ -48,29 +32,30 @@ class LocationAutoComplete extends Component {
     })
   }
 
-  onUpdateInput = (searchText, dataSource) => {
-    if (!searchText.length || !this.state.autocompleteService) {
-      return false
-    }
-
-    this.state.autocompleteService.getPlacePredictions({
-      input: searchText,
-      componentRestrictions: this.props.componentRestrictions,
-      location: this.props.location || new google.maps.LatLng(0, 0),
-      radius: this.props.radius || 0
-    }, data => this.updateDatasource(data))
-  }
-
-  onNewRequest = (searchText, index) => {
-    // The index in dataSource of the list item selected, or -1 if enter is pressed in the TextField
+  handleNewRequest = (searchText, index) => {
     if (index === -1) {
-      return false
+      return
     }
 
-    this.props.onNewRequest(this.state.data[index], searchText, index)
+    const data = this.state.data[index]
+    places.getDetails({ placeId: data.place_id }, (address) => {
+      this.props.onPlaceChange(getAddressComponents(address))
+    })
   }
 
   handleInputChange = (searchText) => {
+    if (!searchText.length) {
+      return
+    }
+
+    autocomplete.getPlacePredictions({
+      input: searchText,
+      componentRestrictions: this.props.componentRestrictions,
+      types: ['(cities)'],
+      location: this.props.location || new google.maps.LatLng(0, 0),
+      radius: this.props.radius || 0,
+    }, data => this.updateDataSource(data))
+
     this.props.onChange({ target: { value: searchText } })
   }
 
@@ -78,11 +63,10 @@ class LocationAutoComplete extends Component {
     return (
       <AutoComplete
         {...this.props}
-        ref={this.props.getRef}
         filter={AutoComplete.noFilter}
         onUpdateInput={this.handleInputChange}
         dataSource={this.state.dataSource}
-        onNewRequest={this.onNewRequest}
+        onNewRequest={this.handleNewRequest}
       />
     )
   }
@@ -94,7 +78,8 @@ LocationAutoComplete.propTypes = {
   location: PropTypes.object,
   radius: PropTypes.number,
   onNewRequest: PropTypes.func,
-  getRef: PropTypes.func,
+  onPlaceChange: PropTypes.func,
+  onChange: PropTypes.func,
 }
 
 export default LocationAutoComplete
