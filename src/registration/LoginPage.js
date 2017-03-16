@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react'
-import { Textfield, Button } from 'react-mdl'
 import { Link } from 'react-router'
+import { TextField, RaisedButton } from 'material-ui'
 
 import { login, loginWithGoogle } from '../utils/auth'
 
@@ -50,25 +50,25 @@ class LoginPage extends Component {
   render() {
     return (
       <div>
-        <h1>Login</h1>
-        <Textfield
-          name="email"
-          label="Email"
-          floatingLabel
-          onChange={this.handleInputChange}
-        />
-        <Textfield
-          name="password"
-          label="Password"
-          type="password"
-          floatingLabel
-          onChange={this.handleInputChange}
-        />
-        <Button raised onClick={this.login}>Log In</Button>
-        <Button raised onClick={() => loginWithGoogle}>Login with Google</Button>
-        <div>
-          <span>Dont have an account?</span>
-          <Link to="/signup">Sign up</Link>
+        <div style={{ margin: 24 }}>
+          <h1>Login</h1>
+          <TextField
+            name="email"
+            floatingLabelText="Email"
+            onChange={this.handleInputChange}
+          />
+          <TextField
+            name="password"
+            floatingLabelText="Password"
+            type="password"
+            onChange={this.handleInputChange}
+          />
+          <RaisedButton fullWidth onClick={this.login}>Log In</RaisedButton>
+          <RaisedButton fullWidth onClick={() => loginWithGoogle}>Login with Google</RaisedButton>
+          <div>
+            <span>Dont have an account?</span>
+            <Link to="/signup">Sign up</Link>
+          </div>
         </div>
       </div>
     )

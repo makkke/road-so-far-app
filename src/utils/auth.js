@@ -43,7 +43,7 @@ const createAuth0 = () => (
   new Auth0.WebAuth({
     clientID: process.env.AUTH0_CLIENT_ID,
     domain: process.env.AUTH0_DOMAIN,
-    responseType: 'token id_token',
+    responseType: 'token',
     redirectUri: process.env.AUTH0_REDIRECT_URI,
   })
 )
