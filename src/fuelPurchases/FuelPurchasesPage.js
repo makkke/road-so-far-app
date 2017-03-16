@@ -42,8 +42,8 @@ FuelPurchasesPage.propTypes = {
   }).isRequired,
 }
 
-const MyQuery = gql`
-  query MyQuery {
+const FUEL_PURCHASES_QUERY = gql`
+  query FuelPurchasesQuery {
     fuelPurchases {
       id
       quantity {
@@ -54,6 +54,6 @@ const MyQuery = gql`
   }
 `
 
-const FuelPurchasesPageWithData = graphql(MyQuery)(FuelPurchasesPage)
+const FuelPurchasesPageWithData = graphql(FUEL_PURCHASES_QUERY)(FuelPurchasesPage)
 
 export default FuelPurchasesPageWithData

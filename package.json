@@ -2,16 +2,13 @@
   "name": "road-so-far-app",
   "version": "0.0.2",
   "scripts": {
-    "start:dev": "node tools/run.js",
-    "eslint": "eslint src test tools postcss.config.js webpack.config.js",
-    "stylelint": "stylelint \"components/**/*.css\" \"src/**/*.css\"",
-    "lint": "npm run eslint && npm run stylelint",
-    "test": "mocha --compilers js:babel-register",
-    "test:watch": "mocha --compilers js:babel-register --reporter min --watch",
-    "build": "node tools/build.js",
+    "start": "node tools/run.js",
+    "build": "NODE_ENV=production node tools/build.js",
     "build:debug": "node tools/build.js --debug",
-    "publish": "node tools/publish.js",
-    "publish:debug": "node tools/publish.js --debug"
+    "test:lint": "npm run eslint && npm run stylelint",
+    "test:unit": "mocha --compilers js:babel-register",
+    "eslint": "eslint src test tools postcss.config.js webpack.config.js",
+    "stylelint": "stylelint \"components/**/*.css\" \"src/**/*.css\""
   },
   "dependencies": {
     "apollo-client": "^0.8.7",
@@ -20,12 +17,12 @@
     "classnames": "^2.2.5",
     "fastclick": "^1.0.6",
     "graphql-tag": "^1.2.4",
+    "immutability-helper": "^2.1.2",
     "install": "^0.8.7",
     "jwt-decode": "^2.1.0",
     "material-ui": "^0.17.0",
     "material-ui-places": "^1.0.3",
     "moment": "^2.17.1",
-    "npm": "^4.2.0",
     "react": "^15.4.2",
     "react-apollo": "^0.11.1",
     "react-dom": "^15.4.2",
@@ -38,6 +35,7 @@
     "react-tap-event-plugin": "^2.0.1",
     "redux": "^3.6.0",
     "redux-thunk": "^2.2.0",
+    "uuid": "^3.0.1",
     "whatwg-fetch": "^2.0.2"
   },
   "devDependencies": {

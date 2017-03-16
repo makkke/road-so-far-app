@@ -52,7 +52,7 @@ class LocationAutoComplete extends Component {
       input: searchText,
       componentRestrictions: this.props.componentRestrictions,
       types: ['(cities)'],
-      location: this.props.location || new google.maps.LatLng(0, 0),
+      location: new google.maps.LatLng(0, 0), // TODO: get current location
       radius: this.props.radius || 0,
     }, data => this.updateDataSource(data))
 
@@ -74,10 +74,10 @@ class LocationAutoComplete extends Component {
 
 LocationAutoComplete.propTypes = {
   searchText: PropTypes.string,
-  componentRestrictions: PropTypes.object,
-  location: PropTypes.object,
+  componentRestrictions: PropTypes.shape({
+    country: PropTypes.array,
+  }),
   radius: PropTypes.number,
-  onNewRequest: PropTypes.func,
   onPlaceChange: PropTypes.func,
   onChange: PropTypes.func,
 }

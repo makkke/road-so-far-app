@@ -1,6 +1,8 @@
 import React, { Component, PropTypes } from 'react'
 import { graphql } from 'react-apollo'
 import gql from 'graphql-tag'
+import uuid from 'uuid'
+import update from 'immutability-helper'
 import { AppBar, DatePicker, TextField, RaisedButton } from 'material-ui'
 
 import { getCurrentLocation } from '../utils/google'
@@ -105,15 +107,19 @@ CreateFuelPurchasesPage.propTypes = {
   createFuelPurchase: PropTypes.func.isRequired,
 }
 
-const createFuelPurchase = gql`
-  mutation createFuelPurchase($input: FuelPurchaseInput!) {
+const CREATE_FUEL_PURCHASE_MUTATION = gql`
+  mutation CreateFuelPurchase($input: FuelPurchaseInput!) {
     createFuelPurchase(input: $input) {
       id
+      quantity {
+        value
+      }
+      createdAt
     }
   }
 `
 
-const CreateFuelPurchasesPageWithData = graphql(createFuelPurchase, {
+const CreateFuelPurchasesPageWithMutations = graphql(CREATE_FUEL_PURCHASE_MUTATION, {
   props: ({ mutate }) => ({
     createFuelPurchase: (fuelPurchase) => {
       const quantity = {
@@ -127,9 +133,29 @@ const CreateFuelPurchasesPageWithData = graphql(createFuelPurchase, {
         city: fuelPurchase.city,
       }
 
-      return mutate({ variables: { input } })
+      return mutate({
+        variables: { input },
+        optimisticResponse: {
+          __typename: 'Mutation',
+          createFuelPurchase: {
+            __typename: 'FuelPurchase',
+            id: uuid.v4(),
+            quantity,
+            createdAt: +new Date(),
+          },
+        },
+        updateQueries: {
+          FuelPurchasesQuery: (previousResult, { mutationResult }) => {
+            const newFuelPurchase = mutationResult.data.createFuelPurchase
+
+            return update(previousResult, {
+              fuelPurchases: { $push: [newFuelPurchase] },
+            })
+          },
+        },
+      })
     },
   }),
 })(CreateFuelPurchasesPage)
 
-export default CreateFuelPurchasesPageWithData
+export default CreateFuelPurchasesPageWithMutations

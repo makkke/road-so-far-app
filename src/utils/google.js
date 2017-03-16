@@ -15,6 +15,18 @@ export const getAddressComponents = (address) => {
 
 export const getCurrentLocation = () => (
   new Promise((resolve, reject) => {
+    const options = {
+      timeout: 5000,
+      maximumAge: 1000 * 60 * 60 * 24, // 1 day
+    }
+
+    // TODO: add a fallback to navigator.geolocation.getCurrentPosition
+    // var latLong;
+    // $.getJSON("http://ipinfo.io", function(ipinfo){
+    //     console.log("Found location ["+ipinfo.loc+"] by ipinfo.io")
+    //     latLong = ipinfo.loc.split(",")
+    // })
+
     navigator.geolocation.getCurrentPosition((position) => {
       const location = {
         lat: position.coords.latitude,
@@ -35,7 +47,7 @@ export const getCurrentLocation = () => (
 
         resolve(getAddressComponents(address))
       })
-    })
+    }, err => reject(err), options)
   })
 )
 
