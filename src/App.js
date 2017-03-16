@@ -5,12 +5,13 @@ import { ApolloProvider } from 'react-apollo'
 import { Router, browserHistory } from 'react-router'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
 
-// Import Routes
 import routes from './routes'
 
-// Base stylesheet
-require('./app.css')
+// Base stylesheets
+import './normalize.css'
+import './app.css'
 
+// Setup Apollo client
 const networkInterface = createNetworkInterface({ uri: `${process.env.ROAD_SO_FAR_API}/graphql` })
 networkInterface.use([{
   applyMiddleware(req, next) {
@@ -27,6 +28,7 @@ networkInterface.use([{
 const client = new ApolloClient({ networkInterface })
 
 function App(props) {
+  // TODO: try to change order of providers for performance?
   return (
     <MuiThemeProvider>
       <ApolloProvider client={client}>
